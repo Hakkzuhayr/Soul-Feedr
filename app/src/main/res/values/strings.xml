@@ -1,6 +1,19 @@
 <resources>
     <string name="app_name">Loop Player</string>
     <string name="open_file">Open MP3 file</string>
+    <string name="dl_header">Download MP3 from a link</string>
+    <string name="dl_hint">Paste a YouTube link</string>
+    <string name="dl_button">Download MP3</string>
+    <string name="dl_cancel">Cancel</string>
+    <string name="dl_my_downloads">My downloads</string>
+    <string name="dl_no_downloads">No downloads yet</string>
+    <string name="dl_no_link">That doesn\'t look like a link</string>
+    <string name="dl_preparing">Preparing downloader…</string>
+    <string name="dl_updating">Updating downloader, then retrying…</string>
+    <string name="dl_saving">Saving to Music/LoopPlayer…</string>
+    <string name="dl_done">Saved: %1$s</string>
+    <string name="dl_canceled">Download canceled</string>
+    <string name="dl_failed">Download failed: %1$s</string>
     <string name="no_track">No track loaded</string>
     <string name="unknown_track">Unknown track</string>
     <string name="play_pause">Play / Pause</string>

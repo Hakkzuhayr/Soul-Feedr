@@ -10,12 +10,18 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.OpenableColumns
+import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -24,7 +30,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), Downloader.Listener {
 
     private lateinit var player: ExoPlayer
     private var controllerFuture: ListenableFuture<MediaController>? = null
@@ -39,6 +45,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var loopMode: Button
     private lateinit var abInfo: TextView
     private lateinit var loopCounter: TextView
+    private lateinit var urlInput: EditText
+    private lateinit var btnDownload: Button
+    private lateinit var btnCancelDownload: Button
+    private lateinit var dlProgress: ProgressBar
+    private lateinit var dlStatus: TextView
 
     private val pickAudio = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
@@ -71,6 +82,18 @@ class MainActivity : AppCompatActivity() {
         loopMode = findViewById(R.id.btnLoopMode)
         abInfo = findViewById(R.id.abInfo)
         loopCounter = findViewById(R.id.loopCounter)
+        urlInput = findViewById(R.id.urlInput)
+        btnDownload = findViewById(R.id.btnDownload)
+        btnCancelDownload = findViewById(R.id.btnCancelDownload)
+        dlProgress = findViewById(R.id.dlProgress)
+        dlStatus = findViewById(R.id.dlStatus)
+
+        btnDownload.setOnClickListener { startDownload(urlInput.text?.toString()) }
+        urlInput.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_GO) { startDownload(urlInput.text?.toString()); true } else false
+        }
+        btnCancelDownload.setOnClickListener { Downloader.cancel() }
+        findViewById<Button>(R.id.btnMyDownloads).setOnClickListener { showMyDownloads() }
 
         findViewById<Button>(R.id.btnOpen).setOnClickListener {
             pickAudio.launch(arrayOf("audio/mpeg", "audio/*"))
@@ -137,9 +160,12 @@ class MainActivity : AppCompatActivity() {
         val token = SessionToken(this, ComponentName(this, PlaybackService::class.java))
         controllerFuture = MediaController.Builder(this, token).buildAsync()
         handler.post(ticker)
+        Downloader.listener = this
+        onDownloadUpdate()
     }
 
     override fun onStop() {
+        if (Downloader.listener === this) Downloader.listener = null
         handler.removeCallbacks(ticker)
         controllerFuture?.let { MediaController.releaseFuture(it) }
         controllerFuture = null
@@ -152,12 +178,67 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleViewIntent(intent: Intent?) {
-        if (intent?.action == Intent.ACTION_VIEW) intent.data?.let { open(it) }
+        when (intent?.action) {
+            Intent.ACTION_VIEW -> intent.data?.let { open(it) }
+            // Shared from the YouTube app (Share → Loop Player)
+            Intent.ACTION_SEND -> {
+                val url = Downloader.extractUrl(intent.getStringExtra(Intent.EXTRA_TEXT))
+                if (url != null) {
+                    urlInput.setText(url)
+                    startDownload(url)
+                }
+            }
+        }
     }
 
-    private fun open(uri: Uri) {
-        LoopPlayer.load(this, uri, displayName(uri))
+    private fun open(uri: Uri, title: String = displayName(uri)) {
+        LoopPlayer.load(this, uri, title)
         refreshAll()
+    }
+
+    // ---------------------------------------------------------------- downloader
+
+    private fun startDownload(text: String?) {
+        val url = Downloader.extractUrl(text)
+        if (url == null) {
+            toast(getString(R.string.dl_no_link))
+            return
+        }
+        (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager)
+            .hideSoftInputFromWindow(urlInput.windowToken, 0)
+        Downloader.start(this, url)
+    }
+
+    override fun onDownloadUpdate() {
+        val running = Downloader.running
+        btnDownload.isEnabled = !running
+        btnCancelDownload.visibility = if (running) View.VISIBLE else View.GONE
+        dlProgress.visibility = if (running) View.VISIBLE else View.GONE
+        val p = Downloader.progress
+        dlProgress.isIndeterminate = p < 0f
+        if (p >= 0f) dlProgress.progress = p.toInt()
+        dlStatus.text = Downloader.status
+        dlStatus.visibility = if (Downloader.status.isEmpty()) View.GONE else View.VISIBLE
+    }
+
+    override fun onDownloadFinished(saved: Downloader.Saved) {
+        urlInput.setText("")
+        open(saved.uri, saved.title)
+    }
+
+    private fun showMyDownloads() {
+        val items = Downloader.listDownloads(this)
+        if (items.isEmpty()) {
+            toast(getString(R.string.dl_no_downloads))
+            return
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dl_my_downloads)
+            .setItems(items.map { it.title }.toTypedArray()) { _, which ->
+                open(items[which].uri, items[which].title)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun displayName(uri: Uri): String {

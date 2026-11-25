@@ -11,8 +11,21 @@ android {
         applicationId = "com.example.loopplayer"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
+
+        // The downloader ships native programs (python, ffmpeg); keep only phone CPU types
+        // so the APK stays smaller.
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
+    }
+
+    packaging {
+        // yt-dlp/ffmpeg must be extracted to disk to run
+        jniLibs {
+            useLegacyPackaging = true
+        }
     }
 
     buildTypes {
@@ -36,4 +49,9 @@ dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
+
+    // YouTube → MP3 downloader (yt-dlp + ffmpeg)
+    val ytdl = "0.18.1"
+    implementation("io.github.junkfood02.youtubedl-android:library:$ytdl")
+    implementation("io.github.junkfood02.youtubedl-android:ffmpeg:$ytdl")
 }
