@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">Loop Player</string>
+    <string name="open_file">Open MP3 file</string>
+    <string name="no_track">No track loaded</string>
+    <string name="unknown_track">Unknown track</string>
+    <string name="play_pause">Play / Pause</string>
+    <string name="back_5">Back 5 seconds</string>
+    <string name="forward_5">Forward 5 seconds</string>
+    <string name="loop_off">🔁  Loop: OFF</string>
+    <string name="loop_track">🔂  Loop: WHOLE TRACK</string>
+    <string name="loop_ab">🔁  Loop: A ↔ B SECTION</string>
+    <string name="loop_count">Looped %d times</string>
+    <string name="ab_header">Loop a section (A-B)</string>
+    <string name="set_a">Set A</string>
+    <string name="set_b">Set B</string>
+    <string name="clear">Clear</string>
+    <string name="ab_info">A: %1$s   B: %2$s</string>
+    <string name="a_minus">A −0.1s</string>
+    <string name="a_plus">A +0.1s</string>
+    <string name="b_minus">B −0.1s</string>
+    <string name="b_plus">B +0.1s</string>
+    <string name="a_after_b">A must be before B</string>
+    <string name="b_before_a">B must be after A</string>
+</resources>

@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.LoopPlayer" parent="Theme.Material3.DayNight">
+        <item name="colorPrimary">#FF9800</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorSecondaryContainer">#FFE0B2</item>
+        <item name="colorOnSecondaryContainer">#3E2700</item>
+    </style>
+</resources>
