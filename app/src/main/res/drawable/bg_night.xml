@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Night sky: deep blue gradient, glowing full moon, stars, mountains and a lake reflecting the moonlight -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="400dp"
+    android:height="800dp"
+    android:viewportWidth="400"
+    android:viewportHeight="800">
+
+    <!-- Sky -->
+    <path android:pathData="M0,0h400v800h-400z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0" android:startY="0"
+                android:endX="0" android:endY="800">
+                <item android:offset="0" android:color="#FF070B24" />
+                <item android:offset="0.45" android:color="#FF141D4A" />
+                <item android:offset="0.8" android:color="#FF0B1030" />
+                <item android:offset="1" android:color="#FF04050D" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Moon glow -->
+    <path android:pathData="M140,150a160,160 0 1,0 320,0a160,160 0 1,0 -320,0z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="300" android:centerY="150"
+                android:gradientRadius="160">
+                <item android:offset="0" android:color="#66C9D6FF" />
+                <item android:offset="0.35" android:color="#2299AAEE" />
+                <item android:offset="1" android:color="#00141D4A" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Moon -->
+    <path android:pathData="M254,150a46,46 0 1,0 92,0a46,46 0 1,0 -92,0z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="radial"
+                android:centerX="288" android:centerY="138"
+                android:gradientRadius="60">
+                <item android:offset="0" android:color="#FFFFFDF4" />
+                <item android:offset="0.7" android:color="#FFE6EAF8" />
+                <item android:offset="1" android:color="#FFC8CFEA" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Moon craters -->
+    <path
+        android:fillColor="#1F5A6390"
+        android:pathData="M277,140a8,8 0 1,0 16,0a8,8 0 1,0 -16,0zM312,165a6,6 0 1,0 12,0a6,6 0 1,0 -12,0zM296,175a4,4 0 1,0 8,0a4,4 0 1,0 -8,0zM308,128a4,4 0 1,0 8,0a4,4 0 1,0 -8,0zM265,160a3,3 0 1,0 6,0a3,3 0 1,0 -6,0z" />
+
+    <!-- Small stars -->
+    <path
+        android:fillColor="#B3FFFFFF"
+        android:pathData="M28.6,40a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM78.6,90a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM138.6,30a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM198.6,70a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM58.6,180a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM118.6,140a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM218.6,230a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM28.6,260a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM168.6,260a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM378.6,30a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM368.6,270a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM248.6,320a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM88.6,330a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM328.6,390a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM18.6,420a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM148.6,410a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM268.6,460a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM378.6,480a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM58.6,500a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM198.6,500a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM338.6,20a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0zM178.6,170a1.4,1.4 0 1,0 2.8,0a1.4,1.4 0 1,0 -2.8,0z" />
+
+    <!-- Bright stars -->
+    <path
+        android:fillColor="#FFF4F6FF"
+        android:pathData="M107.8,60a2.2,2.2 0 1,0 4.4,0a2.2,2.2 0 1,0 -4.4,0zM237.8,120a2.2,2.2 0 1,0 4.4,0a2.2,2.2 0 1,0 -4.4,0zM347.8,330a2.2,2.2 0 1,0 4.4,0a2.2,2.2 0 1,0 -4.4,0zM37.8,350a2.2,2.2 0 1,0 4.4,0a2.2,2.2 0 1,0 -4.4,0zM127.8,450a2.2,2.2 0 1,0 4.4,0a2.2,2.2 0 1,0 -4.4,0z" />
+
+    <!-- Far mountains -->
+    <path
+        android:fillColor="#FF121A46"
+        android:pathData="M0,600L50,560L110,590L170,530L230,585L290,550L350,590L400,560L400,700L0,700z" />
+
+    <!-- Near mountains -->
+    <path
+        android:fillColor="#FF080C26"
+        android:pathData="M0,650L70,610L130,640L200,600L270,650L330,620L400,660L400,700L0,700z" />
+
+    <!-- Lake -->
+    <path android:pathData="M0,700h400v100h-400z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0" android:startY="700"
+                android:endX="0" android:endY="800">
+                <item android:offset="0" android:color="#FF0E1540" />
+                <item android:offset="1" android:color="#FF04050D" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Moonlight shimmering on the water -->
+    <path
+        android:fillColor="#88E8ECFF"
+        android:pathData="M285,712h30v3h-30zM276,726h48v3h-48zM290,741h20v2h-20zM280,755h40v2h-40zM293,769h14v2h-14zM286,782h28v2h-28z" />
+</vector>

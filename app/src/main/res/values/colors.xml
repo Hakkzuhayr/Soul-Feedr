@@ -1,3 +1,8 @@
 <resources>
-    <color name="ic_launcher_background">#FF9800</color>
+    <color name="ic_launcher_background">#FF17204F</color>
+    <color name="moon">#FFDCE3FF</color>
+    <color name="moon_dim">#FFA4AED6</color>
+    <color name="moon_gold">#FFFFD98E</color>
+    <color name="night_deep">#FF0B1030</color>
+    <color name="night_bottom">#FF04050D</color>
 </resources>

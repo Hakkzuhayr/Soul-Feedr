@@ -1,6 +1,7 @@
 package com.example.loopplayer
 
 import android.Manifest
+import android.app.RecoverableSecurityException
 import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,6 +10,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.graphics.Typeface
+import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -16,11 +19,15 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaMetadata
@@ -29,6 +36,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
+import java.io.File
 
 class MainActivity : AppCompatActivity(), Downloader.Listener {
 
@@ -50,6 +58,10 @@ class MainActivity : AppCompatActivity(), Downloader.Listener {
     private lateinit var btnCancelDownload: Button
     private lateinit var dlProgress: ProgressBar
     private lateinit var dlStatus: TextView
+    private lateinit var trackList: LinearLayout
+    private lateinit var libraryEmpty: TextView
+    private lateinit var libraryHeader: TextView
+    private var tracks: List<Downloader.Saved> = emptyList()
 
     private val pickAudio = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
@@ -60,12 +72,20 @@ class MainActivity : AppCompatActivity(), Downloader.Listener {
         }
     }
 
-    private val askNotifications =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
+    // Notifications (player controls) + reading music (so saved songs survive reinstalling)
+    private val askPermissions =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { refreshLibrary() }
+
+    // Android asks "Allow Loop Player to delete this?" for songs saved by an older install
+    private val deleteRequest =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { refreshLibrary() }
 
     private val playerListener = object : Player.Listener {
         override fun onIsPlayingChanged(isPlaying: Boolean) = refreshPlayButton()
-        override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) = refreshTitle()
+        override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+            refreshTitle()
+            refreshHighlight()
+        }
         override fun onPlaybackStateChanged(playbackState: Int) = refreshAll()
     }
 
@@ -87,13 +107,15 @@ class MainActivity : AppCompatActivity(), Downloader.Listener {
         btnCancelDownload = findViewById(R.id.btnCancelDownload)
         dlProgress = findViewById(R.id.dlProgress)
         dlStatus = findViewById(R.id.dlStatus)
+        trackList = findViewById(R.id.trackList)
+        libraryEmpty = findViewById(R.id.libraryEmpty)
+        libraryHeader = findViewById(R.id.libraryHeader)
 
         btnDownload.setOnClickListener { startDownload(urlInput.text?.toString()) }
         urlInput.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_GO) { startDownload(urlInput.text?.toString()); true } else false
         }
         btnCancelDownload.setOnClickListener { Downloader.cancel() }
-        findViewById<Button>(R.id.btnMyDownloads).setOnClickListener { showMyDownloads() }
 
         findViewById<Button>(R.id.btnOpen).setOnClickListener {
             pickAudio.launch(arrayOf("audio/mpeg", "audio/*"))
@@ -139,11 +161,14 @@ class MainActivity : AppCompatActivity(), Downloader.Listener {
 
         player.addListener(playerListener)
 
-        if (Build.VERSION.SDK_INT >= 33 &&
-            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
-        ) {
-            askNotifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        val wanted = if (Build.VERSION.SDK_INT >= 33)
+            listOf(Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.READ_MEDIA_AUDIO)
+        else
+            listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        val missing = wanted.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
+        if (missing.isNotEmpty()) askPermissions.launch(missing.toTypedArray())
 
         if (savedInstanceState == null) handleViewIntent(intent)
         refreshAll()
@@ -162,6 +187,7 @@ class MainActivity : AppCompatActivity(), Downloader.Listener {
         handler.post(ticker)
         Downloader.listener = this
         onDownloadUpdate()
+        refreshLibrary()
     }
 
     override fun onStop() {
@@ -222,23 +248,83 @@ class MainActivity : AppCompatActivity(), Downloader.Listener {
     }
 
     override fun onDownloadFinished(saved: Downloader.Saved) {
+        // Just store it in "My music" — you choose when to play it.
         urlInput.setText("")
-        open(saved.uri, saved.title)
+        refreshLibrary()
+        toast(getString(R.string.lib_added, saved.title))
     }
 
-    private fun showMyDownloads() {
-        val items = Downloader.listDownloads(this)
-        if (items.isEmpty()) {
-            toast(getString(R.string.dl_no_downloads))
-            return
+    // ---------------------------------------------------------------- my music list
+
+    private fun refreshLibrary() {
+        tracks = try { Downloader.listDownloads(this) } catch (e: Exception) { emptyList() }
+        trackList.removeAllViews()
+        for (track in tracks) {
+            val row = layoutInflater.inflate(R.layout.item_track, trackList, false)
+            row.findViewById<TextView>(R.id.trackName).text = track.title
+            row.setOnClickListener { open(track.uri, track.title) }
+            row.findViewById<ImageButton>(R.id.trackDelete).setOnClickListener { confirmDelete(track) }
+            row.tag = track.uri
+            trackList.addView(row)
         }
-        AlertDialog.Builder(this)
-            .setTitle(R.string.dl_my_downloads)
-            .setItems(items.map { it.title }.toTypedArray()) { _, which ->
-                open(items[which].uri, items[which].title)
+        libraryEmpty.visibility = if (tracks.isEmpty()) View.VISIBLE else View.GONE
+        libraryHeader.text = if (tracks.isEmpty()) getString(R.string.lib_header)
+            else getString(R.string.lib_header_count, tracks.size)
+        refreshHighlight()
+    }
+
+    /** Shows which song in the list is the one loaded in the player. */
+    private fun refreshHighlight() {
+        if (!::trackList.isInitialized) return
+        val current = player.currentMediaItem?.localConfiguration?.uri
+        for (i in 0 until trackList.childCount) {
+            val row = trackList.getChildAt(i)
+            val active = row.tag == current
+            val color = ContextCompat.getColor(this, if (active) R.color.moon_gold else R.color.moon)
+            row.findViewById<TextView>(R.id.trackName).apply {
+                setTextColor(color)
+                setTypeface(null, if (active) Typeface.BOLD else Typeface.NORMAL)
             }
+            row.findViewById<ImageView>(R.id.trackIcon).setColorFilter(
+                ContextCompat.getColor(this, if (active) R.color.moon_gold else R.color.moon_dim)
+            )
+        }
+    }
+
+    private fun confirmDelete(track: Downloader.Saved) {
+        AlertDialog.Builder(this)
+            .setTitle(R.string.lib_delete_title)
+            .setMessage(getString(R.string.lib_delete_msg, track.title))
+            .setPositiveButton(R.string.lib_delete) { _, _ -> deleteTrack(track) }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+
+    private fun deleteTrack(track: Downloader.Saved) {
+        if (player.currentMediaItem?.localConfiguration?.uri == track.uri) {
+            player.stop()
+            player.clearMediaItems()
+            LoopPlayer.clearPoints()
+            refreshAll()
+        }
+        try {
+            if (track.uri.scheme == "file") {
+                track.uri.path?.let { File(it).delete() }
+            } else {
+                contentResolver.delete(track.uri, null, null)
+            }
+            refreshLibrary()
+        } catch (e: SecurityException) {
+            // The file was saved by an earlier install: Android must ask you first.
+            val sender = when {
+                Build.VERSION.SDK_INT >= 30 ->
+                    MediaStore.createDeleteRequest(contentResolver, listOf(track.uri)).intentSender
+                Build.VERSION.SDK_INT == 29 && e is RecoverableSecurityException ->
+                    e.userAction.actionIntent.intentSender
+                else -> null
+            }
+            if (sender != null) deleteRequest.launch(IntentSenderRequest.Builder(sender).build())
+        }
     }
 
     private fun displayName(uri: Uri): String {

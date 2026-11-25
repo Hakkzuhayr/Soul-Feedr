@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">Loop Player</string>
-    <string name="open_file">Open MP3 file</string>
+    <string name="app_title">🌙 Loop Player</string>
+    <string name="open_file">+ Add from phone</string>
+    <string name="lib_header">My music</string>
+    <string name="lib_header_count">My music (%1$d)</string>
+    <string name="lib_empty">Songs you download appear here. Tap one to play it.</string>
+    <string name="lib_delete">Delete</string>
+    <string name="lib_delete_title">Delete this song?</string>
+    <string name="lib_delete_msg">\"%1$s\" will be removed from your phone.</string>
+    <string name="lib_added">Saved to My music: %1$s</string>
     <string name="dl_header">Download MP3 from a link</string>
     <string name="dl_hint">Paste a YouTube link</string>
     <string name="dl_button">Download MP3</string>

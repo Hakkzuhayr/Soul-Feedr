@@ -1,8 +1,27 @@
 <resources>
-    <style name="Theme.LoopPlayer" parent="Theme.Material3.DayNight">
-        <item name="colorPrimary">#FF9800</item>
-        <item name="colorOnPrimary">#000000</item>
-        <item name="colorSecondaryContainer">#FFE0B2</item>
-        <item name="colorOnSecondaryContainer">#3E2700</item>
+    <!-- Dark "moonlight" theme -->
+    <style name="Theme.LoopPlayer" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/moon</item>
+        <item name="colorOnPrimary">@color/night_deep</item>
+        <item name="colorPrimaryContainer">#FF2C3A73</item>
+        <item name="colorOnPrimaryContainer">#FFE3E8FF</item>
+        <item name="colorSecondaryContainer">#FF26305E</item>
+        <item name="colorOnSecondaryContainer">#FFE3E8FF</item>
+        <item name="colorSurface">#FF121838</item>
+        <item name="colorOnSurface">#FFE8ECFF</item>
+        <item name="colorOnSurfaceVariant">@color/moon_dim</item>
+        <item name="colorOutline">#FF5A6699</item>
+        <item name="android:colorBackground">@color/night_bottom</item>
+        <item name="android:windowBackground">@color/night_bottom</item>
+        <item name="android:statusBarColor">#FF070B24</item>
+        <item name="android:navigationBarColor">@color/night_bottom</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <!-- See-through cards so the night sky shows behind -->
+    <style name="MoonCard" parent="Widget.Material3.CardView.Outlined">
+        <item name="cardBackgroundColor">#B3101634</item>
+        <item name="strokeColor">#40C9D6FF</item>
+        <item name="cardCornerRadius">22dp</item>
     </style>
 </resources>

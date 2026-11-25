@@ -18,8 +18,8 @@ class LoopSeekBar @JvmOverloads constructor(
     var loopEnd: Int = -1
         set(v) { field = v; invalidate() }
 
-    private val regionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x66FF9800 }
-    private val markerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFF9800.toInt() }
+    private val regionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x55FFD98E }
+    private val markerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFD98E.toInt() }
     private val markerWidth = 3f * resources.displayMetrics.density
 
     override fun onDraw(canvas: Canvas) {
